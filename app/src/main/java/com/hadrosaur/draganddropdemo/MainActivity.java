@@ -45,10 +45,10 @@ public class MainActivity extends AppCompatActivity {
         TextView dragText = findViewById(R.id.text_drag);
         FrameLayout targetFrame = findViewById(R.id.frame_target);
 
-        //Set up drop target listener
+        //Set up drop target listener.
         targetFrame.setOnDragListener(new DropTargetListener(this));
 
-        //Set up draggable item listener
+        //Set up draggable item listener.
         dragText.setOnLongClickListener(new TextViewLongClickListener());
     }
 
@@ -65,11 +65,11 @@ public class MainActivity extends AppCompatActivity {
 
             switch(action) {
                 case DragEvent.ACTION_DRAG_STARTED:
-                    // Limit the types of items we can receive to plain-text and Chrome OS files
+                    // Limit the types of items this can receive to plain-text and Chrome OS files
                     if (event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)
                             || event.getClipDescription().hasMimeType("application/x-arc-uri-list")) {
 
-                        // Greenify background colour so user knows this is a target
+                        // Greenify background colour so user knows this is a target.
                         v.setBackgroundColor(Color.argb(55,0,255,0));
 
                         // Invalidate the view to force a redraw in the new tint
@@ -78,11 +78,11 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     }
 
-                    //If the dragged item is of an undesired type, report we are not a valid target
+                    //If the dragged item is of an undesired type, report that this is not a valid target
                     return false;
 
                 case DragEvent.ACTION_DRAG_ENTERED:
-                    // Increase green background colour when item is over top of target
+                    // Increase green background colour when item is over top of target.
                     v.setBackgroundColor(Color.argb(150,0,255,0));
                     v.invalidate();
                     return true;
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                     return true;
 
                 case DragEvent.ACTION_DRAG_EXITED:
-                    // Less intense green background colour when item not over target
+                    // Less intense green background colour when item not over target.
                     v.setBackgroundColor(Color.argb(55,0,255,0));
                     v.invalidate();
                     return true;
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                     ClipData.Item item = event.getClipData().getItemAt(0);
 
                     if (event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
-                        //If we have a text item, we simply display it in a new TextView
+                        //If this is a text item, simply display it in a new TextView.
                         FrameLayout frameTarget = (FrameLayout) v;
                         frameTarget.removeAllViews();
 
@@ -116,9 +116,9 @@ public class MainActivity extends AppCompatActivity {
                         frameTarget.addView(dropped_text);
 
                     } else if (event.getClipDescription().hasMimeType("application/x-arc-uri-list")) {
-                        //If we have a file, we read the first 200 characters and output them in a new TextView
+                        //If a file, read the first 200 characters and output them in a new TextView.
 
-                        //Note the use of ContentResolver to resolve the ChromeOS content URI
+                        //Note the use of ContentResolver to resolve the ChromeOS content URI.
                         Uri contentUri = item.getUri();
                         ParcelFileDescriptor parcelFileDescriptor;
                         try {
@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
                     return true;
 
                 case DragEvent.ACTION_DRAG_ENDED:
-                    // Restore background colour to transparent
+                    // Restore background colour to transparent.
                     v.setBackgroundColor(Color.argb(0,255,255,255));
                     v.invalidate();
                     return true;
@@ -189,11 +189,11 @@ public class MainActivity extends AppCompatActivity {
             ClipData dragData = new ClipData(dragContent,
                     new String[] {ClipDescription.MIMETYPE_TEXT_PLAIN}, item);
 
-            //Set the visual look of the dragged object
-            //Can be extended and customized.  We use the default here.
+            //Set the visual look of the dragged object.
+            //Can be extended and customized. Default is used here.
             View.DragShadowBuilder dragShadow = new View.DragShadowBuilder(v);
 
-            // Starts the drag, note: global flag allows for cross-application drag
+            // Starts the drag, note: global flag allows for cross-application drag.
             v.startDragAndDrop(dragData, dragShadow, null, DRAG_FLAG_GLOBAL);
 
             return false;
