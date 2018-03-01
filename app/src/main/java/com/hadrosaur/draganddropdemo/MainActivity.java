@@ -1,4 +1,4 @@
-/*      Copyright 2017 Google Inc. All rights reserved.
+/*      Copyright 2018 Google Inc. All rights reserved.
 
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
@@ -23,16 +23,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.DragAndDropPermissions;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -50,76 +45,11 @@ public class MainActivity extends AppCompatActivity {
         TextView dragText = findViewById(R.id.text_drag);
         FrameLayout targetFrame = findViewById(R.id.frame_target);
 
-        //Set drag and drop listeners
-        dragText.setOnDragListener(new DragItemListener(this));
+        //Set up drop target listener
         targetFrame.setOnDragListener(new DropTargetListener(this));
 
-        //Set drag initiate listener
-        dragText.setOnLongClickListener(new TextViewLongClickListener(this));
-    }
-
-    protected class TextViewLongClickListener implements View.OnLongClickListener {
-        AppCompatActivity mActivity;
-
-        public TextViewLongClickListener(AppCompatActivity mActivity) {
-            this.mActivity = mActivity;
-        }
-
-        @Override
-        public boolean onLongClick(View v) {
-            TextView thisTextView = (TextView) v;
-            String dragContent = "Dragged Text: " + thisTextView.getText();
-
-            //Set the drag content and type.  Target must be configured to receive the given type
-            ClipData.Item item = new ClipData.Item(dragContent); //Set the drag content
-            ClipData dragData = new ClipData(dragContent, new String[] {ClipDescription.MIMETYPE_TEXT_PLAIN}, item); //Set the drag content type
-
-            //Set the visual look of the dragged object
-            //Can be extended and customized.  We use the default here.
-            View.DragShadowBuilder dragShadow = new View.DragShadowBuilder(v);
-
-            // Starts the drag, global flag allow cross-application drag
-            v.startDragAndDrop(dragData, dragShadow,null,DRAG_FLAG_GLOBAL);
-
-            return false;
-        }
-    }
-
-    protected class DragItemListener implements View.OnDragListener {
-        private AppCompatActivity mActivity;
-
-        public DragItemListener(AppCompatActivity mActivity) {
-            this.mActivity = mActivity;
-        }
-        @Override
-        public boolean onDrag(View v, DragEvent event) {
-            final int action = event.getAction();
-
-            switch(action) {
-                case DragEvent.ACTION_DRAG_STARTED:
-                    //Return false as this is not a drop target
-                    return false;
-
-                case DragEvent.ACTION_DRAG_ENTERED:
-                    return true;
-
-                case DragEvent.ACTION_DRAG_LOCATION:
-                    return true;
-
-                case DragEvent.ACTION_DRAG_EXITED:
-                    return true;
-
-                case DragEvent.ACTION_DROP:
-                    return true;
-
-                case DragEvent.ACTION_DRAG_ENDED:
-                    return true;
-
-                default:
-                    Log.e("DragDrop Example", "Unknown action type received by DragItemListener.");
-                    return false;
-            }
-        }
+        //Set up draggable item listener
+        dragText.setOnLongClickListener(new TextViewLongClickListener());
     }
 
     protected class DropTargetListener implements View.OnDragListener {
@@ -135,19 +65,20 @@ public class MainActivity extends AppCompatActivity {
 
             switch(action) {
                 case DragEvent.ACTION_DRAG_STARTED:
-                    // Limit the types of items we can receive
-                    // - plain text
-                    // - ChromeOS files
+                    // Limit the types of items we can receive to plain-text and Chrome OS files
                     if (event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)
                             || event.getClipDescription().hasMimeType("application/x-arc-uri-list")) {
 
                         // Greenify background colour so user knows this is a target
                         v.setBackgroundColor(Color.argb(55,0,255,0));
+
+                        // Invalidate the view to force a redraw in the new tint
                         v.invalidate();
+
                         return true;
                     }
 
-                    //If the dragged item is of an unrecognized type, we indicate this is not a valid target
+                    //If the dragged item is of an undesired type, report we are not a valid target
                     return false;
 
                 case DragEvent.ACTION_DRAG_ENTERED:
@@ -160,13 +91,12 @@ public class MainActivity extends AppCompatActivity {
                     return true;
 
                 case DragEvent.ACTION_DRAG_EXITED:
-                    // Less intense greenify background colour when item not over target
+                    // Less intense green background colour when item not over target
                     v.setBackgroundColor(Color.argb(55,0,255,0));
                     v.invalidate();
                     return true;
 
                 case DragEvent.ACTION_DROP:
-
                     requestDragAndDropPermissions(event); //Allow items from other applications
                     ClipData.Item item = event.getClipData().getItemAt(0);
 
@@ -247,4 +177,28 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    protected class TextViewLongClickListener implements View.OnLongClickListener {
+        @Override
+        public boolean onLongClick(View v) {
+            TextView thisTextView = (TextView) v;
+            String dragContent = "Dragged Text: " + thisTextView.getText();
+
+            //Set the drag content and type.
+            ClipData.Item item = new ClipData.Item(dragContent);
+            ClipData dragData = new ClipData(dragContent,
+                    new String[] {ClipDescription.MIMETYPE_TEXT_PLAIN}, item);
+
+            //Set the visual look of the dragged object
+            //Can be extended and customized.  We use the default here.
+            View.DragShadowBuilder dragShadow = new View.DragShadowBuilder(v);
+
+            // Starts the drag, note: global flag allows for cross-application drag
+            v.startDragAndDrop(dragData, dragShadow, null, DRAG_FLAG_GLOBAL);
+
+            return false;
+        }
+    }
+
 }
+
