@@ -1,6 +1,6 @@
-#Android on Chrome OS - Drag and Drop Demo
+# Android on Chrome OS - Drag and Drop Demo
 
-##This is not an official Google product
+## This is not an official Google product
 
 A demo android application demonstrating basic Drag and Drop functionality
 with Chrome OS in mind.
